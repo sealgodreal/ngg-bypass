@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ngg bypass by sealgod</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #111; color: #eee;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  #wrap {
+    min-height: 100%; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; box-sizing: border-box;
+  }
+  .card { max-width: 460px; }
+  h1 { font-size: 22px; margin: 0 0 12px; }
+  #status { color: rgba(255,255,255,.7); font-size: 15px; min-height: 22px; }
+  .spin {
+    width: 34px; height: 34px; margin: 0 auto 18px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.25); border-top-color: #ff42a5;
+    animation: s 1s linear infinite;
+  }
+  @keyframes s { to { transform: rotate(360deg); } }
+  #err {
+    display: none; margin-top: 16px; padding: 14px 16px; border-radius: 10px;
+    background: rgba(255,66,88,.12); border: 1px solid rgba(255,66,88,.5);
+    color: #ffb3bd; font-size: 14px; line-height: 1.5;
+  }
+  #retry {
+    display: none; margin-top: 14px; padding: 10px 26px; border: 0; border-radius: 10px;
+    background: #ff42a5; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><div class="card">
+  <div class="spin" id="spin"></div>
+  <div id="status">checking webrtc...</div>
+  <div id="err">webrtc is disabled. please enable webrtc to play roblox.</div>
+  <button id="retry">Retry</button>
+</div></div>
+<script>
+(function () {
+  var statusEl = document.getElementById("status");
+  var errEl = document.getElementById("err");
+  var retryEl = document.getElementById("retry");
+  var spinEl = document.getElementById("spin");
+  function fail() {
+    statusEl.textContent = "webrtc check failed.";
+    errEl.style.display = "block";
+    retryEl.style.display = "inline-block";
+    spinEl.style.display = "none";
+  }
+  function webrtcAllowed(timeoutMs) {
+    return new Promise(function (resolve) {
+      try {
+        var RTC = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+        if (!RTC) { resolve(false); return; }
+        var pc = new RTC({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+        var done = false;
+        var finish = function (ok) {
+          if (done) return; done = true;
+          try { pc.close(); } catch (e) {}
+          resolve(ok);
+        };
+        pc.onicecandidate = function (ev) {
+          if (ev && ev.candidate && ev.candidate.candidate) finish(true);
+        };
+        try { pc.createDataChannel("ngg-probe"); } catch (e) {}
+        pc.createOffer()
+          .then(function (o) { return pc.setLocalDescription(o); })
+          .catch(function () { finish(false); });
+        setTimeout(function () { finish(false); }, timeoutMs || 2500);
+      } catch (e) { resolve(false); }
+    });
+  }
+  function run() {
+    errEl.style.display = "none";
+    retryEl.style.display = "none";
+    spinEl.style.display = "block";
+    statusEl.textContent = "checking webrtc...";
+    webrtcAllowed(2500).then(function (ok) {
+      if (!ok) { fail(); return; }
+      statusEl.textContent = "starting...";
+      var u = new URL(window.location.href);
+      u.searchParams.set("ngg_init", "1");
+      window.location.replace(u.toString());
+    });
+  }
+  retryEl.onclick = run;
+  run();
+})();
+</script>
+</body>
+</html>
