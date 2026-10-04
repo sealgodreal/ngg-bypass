@@ -4,7 +4,7 @@ const path = require("path");
 
 const UPSTREAM = "https://now.gg";
 const ROBLOX_PATH = "/apps/a/19900/b.html";
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 const HEAD_JS = fs.readFileSync(path.join(__dirname, "inject", "head.js"), "utf8");
 const TAIL_JS = fs.readFileSync(path.join(__dirname, "inject", "tail.js"), "utf8");
