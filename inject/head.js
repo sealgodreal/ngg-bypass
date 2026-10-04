@@ -1,5 +1,73 @@
 (function () {
   try {
+    if (window.__nggRtcGate) return;
+    window.__nggRtcGate = 1;
+    var isEntry = false;
+    try {
+      isEntry = window.location.pathname.indexOf("/apps/a/19900/b.html") !== -1;
+    } catch (e0) {}
+    if (!isEntry) return;
+    var hasInit = false;
+    try {
+      var u0 = new URL(window.location.href);
+      hasInit = u0.searchParams.get("ngg_init") === "1";
+    } catch (e0) {}
+    if (!hasInit) return;
+    var RTC0 = null;
+    try {
+      RTC0 = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+    } catch (e0) {}
+    var bounce = function () {
+      try {
+        var u = new URL(window.location.href);
+        u.searchParams.delete("ngg_init");
+        window.location.replace(u.toString());
+      } catch (e1) {}
+    };
+    if (!RTC0) {
+      bounce();
+      return;
+    }
+    try {
+      var pc = new RTC0({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+      var finished = false;
+      var settle = function (ok) {
+        if (finished) return;
+        finished = true;
+        try {
+          pc.close();
+        } catch (e1) {}
+        if (!ok) bounce();
+      };
+      try {
+        pc.onicecandidate = function (ev) {
+          try {
+            if (ev && ev.candidate && ev.candidate.candidate) settle(true);
+          } catch (e1) {}
+        };
+      } catch (e1) {}
+      try {
+        pc.createDataChannel("ngg-probe");
+      } catch (e1) {}
+      try {
+        pc.createOffer().then(function (o) {
+          return pc.setLocalDescription(o);
+        }).catch(function () {
+          settle(false);
+        });
+      } catch (e1) {
+        settle(false);
+      }
+      setTimeout(function () {
+        settle(false);
+      }, 2000);
+    } catch (e1) {
+      bounce();
+    }
+  } catch (e) {}
+})();
+(function () {
+  try {
     var __css = document.createElement("style");
     __css.textContent = "video.preloader-video{visibility:hidden!important;}";
     (document.head || document.documentElement).appendChild(__css);

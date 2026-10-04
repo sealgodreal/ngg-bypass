@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000;
 
 const HEAD_JS = fs.readFileSync(path.join(__dirname, "inject", "head.js"), "utf8");
 const TAIL_JS = fs.readFileSync(path.join(__dirname, "inject", "tail.js"), "utf8");
-const LOAD_HTML = fs.readFileSync(path.join(__dirname, "inject", "load.html"), "utf8");
 const INIT_HTML = fs.readFileSync(path.join(__dirname, "inject", "init.html"), "utf8");
 
 const app = express();
@@ -195,10 +194,6 @@ app.get("/health", (_req, res) => res.json({ ok: true, upstream: UPSTREAM, roblo
 
 app.all("/__noop/*", (_req, res) => res.status(204).end());
 
-app.get("/__load.html", (_req, res) => {
-  res.set("cache-control", "no-store").type("html").send(LOAD_HTML);
-});
-
 app.get("/__loading.mp4", (_req, res) => {
   res.set("cache-control", "no-store");
   res.sendFile(path.join(__dirname, "inject", "loading.mp4"));
@@ -220,7 +215,7 @@ app.get("/icon.png", (_req, res) => {
 });
 
 app.get("/apps/a/19900/b.html", (req, res, next) => {
-  if (req.query && req.query.ngg_init) return next();
+  if (req.query && String(req.query.ngg_init) === "1") return next();
   res.set("cache-control", "no-store").type("html").send(INIT_HTML);
 });
 
