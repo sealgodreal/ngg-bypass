@@ -60,33 +60,45 @@
         if (!RTC) { resolve(false); return; }
         var pc = new RTC({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
         var done = false;
+        var timer = null;
         var finish = function (ok) {
           if (done) return; done = true;
+          try { clearTimeout(timer); } catch (e) {}
           try { pc.close(); } catch (e) {}
           resolve(ok);
         };
         pc.onicecandidate = function (ev) {
           if (ev && ev.candidate && ev.candidate.candidate) finish(true);
         };
+
+        try {
+          pc.onicegatheringstatechange = function () {
+            try { if (pc.iceGatheringState === "complete") finish(false); } catch (e) {}
+          };
+        } catch (e) {}
         try { pc.createDataChannel("ngg-probe"); } catch (e) {}
         pc.createOffer()
           .then(function (o) { return pc.setLocalDescription(o); })
           .catch(function () { finish(false); });
-        setTimeout(function () { finish(false); }, timeoutMs || 2500);
+        timer = setTimeout(function () { finish(false); }, timeoutMs || 1200);
       } catch (e) { resolve(false); }
     });
+  }
+  function startNow() {
+
+    var u = new URL(window.location.href);
+    u.searchParams.set("ngg_init", "1");
+    window.location.replace(u.toString());
   }
   function run() {
     errEl.style.display = "none";
     retryEl.style.display = "none";
     spinEl.style.display = "block";
     statusEl.textContent = "checking webrtc...";
-    webrtcAllowed(2500).then(function (ok) {
+    webrtcAllowed(1200).then(function (ok) {
       if (!ok) { fail(); return; }
       statusEl.textContent = "starting...";
-      var u = new URL(window.location.href);
-      u.searchParams.set("ngg_init", "1");
-      window.location.replace(u.toString());
+      startNow();
     });
   }
   retryEl.onclick = run;
