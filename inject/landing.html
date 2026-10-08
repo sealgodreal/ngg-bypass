@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>nowgg.org | Nebula Unblocking</title>
+  <link rel="icon" href="/logo/icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      font-family: "Poppins", Arial, Helvetica, sans-serif;
+      background: #101010;
+      color: white;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    #vanta {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 100vh;
+      padding: 28px 35px;
+    }
+
+    .header {
+      position: absolute;
+      top: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+
+    .logo img,
+    .logo object {
+      height: 64px;
+      width: auto;
+      display: block;
+    }
+
+    .description {
+      margin-top: 2px;
+      font-size: 0.62rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.48);
+      text-align: center;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .description p + p {
+      margin-top: 1px;
+    }
+
+    .description a {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .games-section {
+      position: absolute;
+      top: 165px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(980px, calc(100% - 70px));
+      pointer-events: auto;
+      padding-bottom: 70px;
+    }
+
+    .beta {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.9);
+      white-space: nowrap;
+      -webkit-text-stroke: 0.6px #000;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+      margin: 0 0 20px;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .game-card {
+      display: block;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 15px;
+      background: rgba(20, 20, 20, 0.75);
+      text-decoration: none;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .game-card:hover {
+      transform: scale(1.06);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .game-art-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.9);
+      background: linear-gradient(135deg, #26262b, #3f3f46);
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      padding: 14px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.02) 65%);
+    }
+
+    .game-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 22px;
+      }
+
+      .header {
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .logo img,
+      .logo object {
+        height: 48px;
+      }
+
+      .description {
+        font-size: 0.75rem;
+        line-height: 1.7;
+      }
+
+      .beta {
+        font-size: 0.85rem;
+      }
+
+      .games-section {
+        top: 190px;
+        width: calc(100% - 44px);
+      }
+
+      .games {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .game-card {
+        border-radius: 12px;
+      }
+
+      .game-overlay {
+        padding: 11px;
+      }
+
+      .game-name {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="vanta"></div>
+
+  <main class="content">
+
+    <header class="header">
+      <div class="logo">
+        <img src="/logo/icon.png" alt="nowgg.org icon" />
+        <img src="/logo/title.svg" alt="nowgg.org" />
+      </div>
+
+      <div class="description">
+        <p>now.gg bypass by <a href="https://sealsarcade.xyz">nebula unblocking</a></p>
+        <p>join the discord: <a href="https://discord.gg/nebulaunblocking">discord.gg/nebulaunblocking</a></p>
+      </div>
+    </header>
+
+    <section class="games-section">
+      <div class="beta">this bypass is in beta!</div>
+      <div class="games" id="games"></div>
+    </section>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
+
+  <script>
+    const games = [
+      { name: "Roblox", image: "/games/img/roadblock.png", url: "/apps/a/19900/b.html" },
+      { name: "Stumble Guys", image: "/games/img/stumbleguys.jpg", url: "/apps/a/10011/b.html" },
+      { name: "Melon Sandbox", image: "/games/img/melon-sandbox.png", url: "/apps/playducky/7199/melon-sandbox.html" },
+      { name: "Rocket League", image: "/games/img/rocketleague.webp", url: "/apps/psyonix-studios/4656/rocket-league.html" },
+      { name: "Android Cloud", image: "/games/img/android.jpg", url: "/apps/uncube/7074/now.html" }
+    ];
+
+    const gamesContainer = document.getElementById("games");
+
+    games.forEach(game => {
+      const card = document.createElement("a");
+      card.className = "game-card";
+      card.href = game.url;
+      const art = game.image
+        ? `<img src="${game.image}" alt="${game.name}" loading="lazy">`
+        : `<div class="game-art-fallback">${game.name.charAt(0)}</div>`;
+      card.innerHTML = `
+        ${art}
+        <div class="game-overlay">
+          <span class="game-name">${game.name}</span>
+        </div>
+      `;
+      gamesContainer.appendChild(card);
+    });
+
+    try {
+      if (window.VANTA && window.THREE) {
+        VANTA.FOG({
+          el: "#vanta",
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          highlightColor: 0x3f3f3f,
+          midtoneColor: 0x2b2b2b,
+          lowlightColor: 0x1e1e1e,
+          baseColor: 0x161616,
+          blurFactor: 0.90,
+          speed: 6.00,
+          zoom: 0.50
+        });
+      }
+    } catch (e) {}
+  </script>
+
+</body>
+</html>

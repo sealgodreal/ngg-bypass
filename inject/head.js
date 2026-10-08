@@ -4,7 +4,8 @@
     window.__nggRtcGate = 1;
     var isEntry = false;
     try {
-      isEntry = window.location.pathname.indexOf("/apps/a/19900/b.html") !== -1;
+      
+      isEntry = /^\/apps\/[^/]+\/\d+\/[^/]+\.html$/.test(window.location.pathname);
     } catch (e0) {}
     if (!isEntry) return;
     var hasInit = false;
@@ -91,6 +92,27 @@
 
   try {
     if (window.__nggLocSpoof) return; window.__nggLocSpoof = 1;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    try {
+      window.__nggRealPathSuffix = function () {
+        try {
+          return window.__nggRealSuffix || window.location.pathname + window.location.search + window.location.hash;
+        } catch (e) { return "/"; }
+      };
+      var _push0 = history.pushState, _rep0 = history.replaceState;
+      history.pushState = function () { try { window.__nggRealSuffix = arguments[2] ? String(arguments[2]) : window.__nggRealSuffix; } catch (e) {} return _push0.apply(this, arguments); };
+      history.replaceState = function () { try { window.__nggRealSuffix = arguments[2] ? String(arguments[2]) : window.__nggRealSuffix; } catch (e) {} return _rep0.apply(this, arguments); };
+    } catch (e0) {}
+    return;
     var REAL = window.__nggReal || { origin: window.location.origin, host: window.location.host, hostname: window.location.hostname, protocol: window.location.protocol };
     var FAKE_ORIGIN = "https://now.gg";
     var FAKE_HOST = "now.gg";
@@ -106,6 +128,15 @@
       if (s.indexOf(FAKE_ORIGIN + "/") === 0) return REAL.origin + s.slice(FAKE_ORIGIN.length);
       if (s === FAKE_ORIGIN) return REAL.origin + "/";
       return s;
+    };
+    
+    
+    var fakePage = function () {
+      try {
+        var p = window.location.pathname || "/";
+        if (p === "/play" || p.indexOf("/play/") === 0) p = p.slice("/play".length) || "/";
+        return FAKE_ORIGIN + p + (window.location.search || "");
+      } catch (e) { return FAKE_ORIGIN + "/"; }
     };
     try {
       var LocProto = (window.Location && window.Location.prototype) || null;
@@ -131,7 +162,11 @@
             configurable: true,
             enumerable: hrefDesc ? !!hrefDesc.enumerable : true,
             get: function () {
-              try { return realToFake(REAL.origin + window.__nggRealPathSuffix()); } catch (e) { return FAKE_ORIGIN + "/apps/a/19900/b.html"; }
+              try {
+                var sfx = window.__nggRealPathSuffix();
+                if (sfx === "/play" || sfx.indexOf("/play/") === 0) sfx = sfx.slice("/play".length) || "/";
+                return realToFake(REAL.origin + sfx);
+              } catch (e) { return fakePage(); }
             },
             set: function (v) {
               try { window.location.assign ? window.location.assign(fakeToReal(String(v))) : (this.href = fakeToReal(String(v))); } catch (e) {}
@@ -146,7 +181,7 @@
         try {
 
           return window.__nggRealSuffix || window.location.pathname + window.location.search + window.location.hash;
-        } catch (e) { return "/apps/a/19900/b.html"; }
+        } catch (e) { return "/"; }
       };
       var _push = history.pushState, _rep = history.replaceState;
       history.pushState = function () { try { window.__nggRealSuffix = arguments[2] ? String(arguments[2]) : window.__nggRealSuffix; } catch (e) {} return _push.apply(this, arguments); };
@@ -154,9 +189,9 @@
     } catch (e) {}
     try {
 
-      var FAKE_REF = FAKE_ORIGIN + "/apps/a/19900/b.html";
-      Object.defineProperty(document, "referrer", { configurable: true, get: function () { return FAKE_REF; } });
-      Object.defineProperty(document, "URL", { configurable: true, get: function () { return realToFake(REAL.origin + "/apps/a/19900/b.html"); } });
+      var FAKE_REF = fakePage();
+      Object.defineProperty(document, "referrer", { configurable: true, get: function () { return fakePage(); } });
+      Object.defineProperty(document, "URL", { configurable: true, get: function () { return fakePage(); } });
       try { Object.defineProperty(document, "baseURI", { configurable: true, get: function () { return FAKE_ORIGIN + "/"; } }); } catch (e) {}
       try {
         var _domainDesc = Object.getOwnPropertyDescriptor(Document.prototype, "domain");
@@ -169,20 +204,67 @@
 (function () {
   if (!window.__nggFetchShim) {
     window.__nggFetchShim = 1;
-    window.__nggShimVersion = 6;
+    window.__nggShimVersion = 7;
     var ngglog = function () {};
     var REAL = window.__nggReal || { origin: window.location.origin, host: window.location.host };
     var REAL_ORIGIN = REAL.origin;
+    
+    
+    
+    
+    
+    
+    
+    
+    var withPrefix = function (url, init) {
+      try {
+        if (typeof url !== "string" || !url) return init;
+        if (url.indexOf("/oapi/") !== 0 && url.indexOf("/accounts/") !== 0 &&
+            url.indexOf("/__nowgg/") !== 0) return init;
+        var p = "";
+        try { p = sessionStorage.getItem("ngg_prefix") || ""; } catch (e) {}
+        if (!/^\d{1,3}$/.test(p)) return init;
+        if (!init) init = {};
+        if (typeof Headers !== "undefined" && init.headers instanceof Headers) {
+          try { if (!init.headers.get("x-ngg-prefix")) init.headers.set("x-ngg-prefix", p); } catch (e) {}
+          return init;
+        }
+        if (Object.prototype.toString.call(init.headers) === "[object Array]") {
+          var has = false;
+          for (var i = 0; i < init.headers.length; i++) {
+            try { if (String(init.headers[i][0]).toLowerCase() === "x-ngg-prefix") { has = true; break; } } catch (e) {}
+          }
+          if (!has) { try { init.headers.push(["x-ngg-prefix", p]); } catch (e) {} }
+          return init;
+        }
+        if (init.headers && typeof init.headers === "object") {
+          var found = false;
+          for (var k in init.headers) {
+            try { if (String(k).toLowerCase() === "x-ngg-prefix") { found = true; break; } } catch (e) {}
+          }
+          if (!found) { try { init.headers["x-ngg-prefix"] = p; } catch (e) {} }
+          return init;
+        }
+        if (!init.headers) { try { init.headers = { "x-ngg-prefix": p }; } catch (e) {} }
+      } catch (e) {}
+      return init;
+    };
 
+    var DIRECT_RE = /^(cdn\.now\.gg|cms-cdn\.now\.gg)$/i;
+    var isDirectHost = function (h) { try { return DIRECT_RE.test(h); } catch (e) { return false; } };
     var rewriteUrl = function (u) {
       if (typeof u !== "string" || !u) return u;
       var out = u;
       try {
+        
+        
+        
+        
         out = out
-          .replace(/https:\/\/cdn\.now\.gg\//gi, "/__cdn/")
-          .replace(/http:\/\/cdn\.now\.gg\//gi, "/__cdn/")
-          .replace(/https:\/\/bugpilot\.now\.gg\//gi, "/__noop/")
-          .replace(/http:\/\/bugpilot\.now\.gg\//gi, "/__noop/")
+          
+          
+          
+          .replace(/https?:\/\/[^\/\s"'\\]*bugpilot\.now\.gg\//gi, function (m) { return REAL_ORIGIN + "/__noop/"; })
           .replace(/https:\/\/(www\.)?now\.gg\//gi, "/")
           .replace(/http:\/\/(www\.)?now\.gg\//gi, "/")
           .replace(/wss:\/\/cdn\.now\.gg\//gi, "/__cdn/")
@@ -190,15 +272,24 @@
           .replace(/wss:\/\/(www\.)?now\.gg\//gi, "/")
           .replace(/ws:\/\/(www\.)?now\.gg\//gi, "/")
 
-          .replace(/https?:\\\/\\\/cdn\.now\.gg\\\//gi, "\\/__cdn\\/")
-          .replace(/https?:\\\/\\\/bugpilot\.now\.gg\\\//gi, "\\/__noop\\/")
+          .replace(/https?:\\\/\\\/[^\\\/\s"']*bugpilot\.now\.gg\\\//gi, function () { return REAL_ORIGIN.split("/").join("\\/") + "\\/__noop\\/"; })
           .replace(/https?:\\\/\\\/(www\.)?now\.gg\\\//gi, "\\/")
           .replace(/wss?:\\\/\\\/cdn\.now\.gg\\\//gi, "\\/__cdn\\/")
           .replace(/wss?:\\\/\\\/(www\.)?now\.gg\\\//gi, "\\/")
 
-          .replace(/https?%3A%2F%2Fcdn\.now\.gg%2F/gi, "/__cdn/")
-          .replace(/https?%3A%2F%2Fbugpilot\.now\.gg%2F/gi, "/__noop/")
+          .replace(/https?%3A%2F%2F[^\/\s"'\\]*bugpilot\.now\.gg%2F/gi, function () { return encodeURIComponent(REAL_ORIGIN) + encodeURIComponent("/__noop/"); })
           .replace(/https?%3A%2F%2F(www\.)?now\.gg%2F/gi, "/");
+
+        
+        
+        try {
+          out = out
+            .replace(/https?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)\//gi, function (m, h) { return isDirectHost(h) ? m : "/__nowgg/" + h + "/"; })
+            .replace(/wss?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)\//gi, "/__nowgg/$1/")
+            .replace(/https?:\\\/\\\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)\\\/\//gi, function (m, h) { return isDirectHost(h) ? m : "\\/__nowgg\\/" + h + "\\/"; })
+            .replace(/wss?:\\\/\\\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)\\\/\//gi, "\\/__nowgg\\/$1\\/")
+            .replace(/https?%3A%2F%2F([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)%2F/gi, function (m, h) { return isDirectHost(h) ? m : "/__nowgg/" + h + "/"; });
+        } catch (e2) {}
 
         if (out === "https://now.gg" || out === "http://now.gg") out = "/";
         else if (out === "https://www.now.gg" || out === "http://www.now.gg") out = "/";
@@ -212,8 +303,16 @@
         try { console.warn("[ngg] forced proxy rewrite:", u.slice(0, 120)); } catch (e) {}
         return u.replace(/^https?:\/\/(www\.)?now\.gg/i, "");
       }
-      if (/^https?:\/\/cdn\.now\.gg\//i.test(u)) return u.replace(/^https?:\/\/cdn\.now\.gg\//i, "/__cdn/");
-      if (/^https?:\/\/bugpilot\.now\.gg\//i.test(u)) return u.replace(/^https?:\/\/bugpilot\.now\.gg\//i, "/__noop/");
+      
+      if (/^https?:\/\/(cdn\.now\.gg|cms-cdn\.now\.gg)\//i.test(u)) return u;
+      if (/^https?:\/\/[^\/]*bugpilot\.now\.gg\//i.test(u)) return REAL_ORIGIN + "/__noop/" + u.replace(/^https?:\/\/[^\/]*bugpilot\.now\.gg\//i, "");
+      var mSub = u.match(/^https?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)(\/.*)?$/i);
+      if (mSub) {
+        if (isDirectHost(mSub[1])) return u;
+        return "/__nowgg/" + mSub[1].toLowerCase() + (mSub[2] || "/");
+      }
+      var mWss = u.match(/^wss?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)(\/.*)?$/i);
+      if (mWss) return "/__nowgg/" + mWss[1].toLowerCase() + (mWss[2] || "/");
       return u;
     };
     var PROXY_ORIGIN = REAL_ORIGIN;
@@ -240,6 +339,11 @@
           .replace(/wss?:\/\/127\.0\.0\.1(:\d+)?/gi, "wss://now.gg")
           .replace(/localhost(:\d+)?/gi, "now.gg")
           .replace(/127\.0\.0\.1(:\d+)?/g, "now.gg");
+      } catch (e) {}
+      
+      
+      try {
+        out = out.split(UPSTREAM_ORIGIN + "/play/apps/").join(UPSTREAM_ORIGIN + "/apps/");
       } catch (e) {}
       return out;
     };
@@ -274,7 +378,13 @@
               if (!copy) { copy = {}; for (var k2 in headers) copy[k2] = headers[k2]; }
               copy[k] = fixOriginLeak(String(headers[k]));
               if (lk === "origin" && /localhost|127\.0\.0\.1/i.test(copy[k])) copy[k] = UPSTREAM_ORIGIN;
-              if ((lk === "referer" || lk === "referrer") && /localhost|127\.0\.0\.1/i.test(copy[k])) copy[k] = UPSTREAM_ORIGIN + "/apps/a/19900/b.html";
+              if ((lk === "referer" || lk === "referrer") && /localhost|127\.0\.0\.1/i.test(copy[k])) {
+                try {
+                  var __pp = window.location.pathname || "/";
+                  if (__pp === "/play" || __pp.indexOf("/play/") === 0) __pp = __pp.slice("/play".length) || "/";
+                  copy[k] = UPSTREAM_ORIGIN + __pp + (window.location.search || "");
+                } catch (e) { copy[k] = UPSTREAM_ORIGIN + "/"; }
+              }
             }
           }
           return copy || headers;
@@ -313,6 +423,89 @@
     };
     try {
       var origFetch = window.fetch;
+      
+      
+      
+      
+      var __nggIsAuthUrl = function (u) {
+        return typeof u === "string" && u.indexOf("createPlayUser") !== -1;
+      };
+      var __nggShouldRetry = function (resp) {
+        try {
+          if (!resp) return true;
+          return resp.status === 429 || resp.status >= 500;
+        } catch (e) { return false; }
+      };
+      var __nggFetchRetry = function (self, url, init, attempt) {
+        var p = null;
+        try {
+          p = origFetch.call(self, url, init);
+        } catch (e) {
+          return Promise.reject(e);
+        }
+        return p.then(function (resp) {
+          try {
+            if (__nggShouldRetry(resp) && attempt < 2) {
+              return new Promise(function (resolve) {
+                setTimeout(function () {
+                  try { if (resp.body && resp.body.cancel) resp.body.cancel(); } catch (e0) {}
+                  try { resolve(__nggFetchRetry(self, url, init, attempt + 1)); } catch (e1) { resolve(resp); }
+                }, 1000);
+              });
+            }
+          } catch (e) {}
+          return resp;
+        });
+      };
+      
+      
+      
+      
+      var __nggPutokEmpty = function (url, init, reqObj) {
+        try {
+          if (typeof url !== "string" || url.indexOf("createPlayUser") === -1) return false;
+          var get = function (headers) {
+            if (!headers) return "";
+            if (typeof Headers !== "undefined" && headers instanceof Headers) {
+              return headers.get("x-ngg-playuser-token") || "";
+            }
+            if (Object.prototype.toString.call(headers) === "[object Array]") {
+              for (var i = 0; i < headers.length; i++) {
+                try {
+                  if (String(headers[i][0]).toLowerCase() === "x-ngg-playuser-token") return headers[i][1] || "";
+                } catch (e) {}
+              }
+              return "";
+            }
+            if (typeof headers === "object") {
+              for (var k in headers) {
+                try {
+                  if (String(k).toLowerCase() === "x-ngg-playuser-token") return headers[k] || "";
+                } catch (e) {}
+              }
+              return "";
+            }
+            return "";
+          };
+          var v = "";
+          try { if (reqObj && reqObj.headers) v = get(reqObj.headers); } catch (e) {}
+          try { if (!v && init && init.headers) v = get(init.headers); } catch (e) {}
+          return !v;
+        } catch (e) { return false; }
+      };
+      
+      var __nggWatchAuth = function (promise, emptyTok) {
+        try {
+          return promise.then(function (resp) {
+            try {
+              if (window.__sealNoteAuthResult) {
+                window.__sealNoteAuthResult(!(resp && (resp.status === 401 || resp.status === 403)), emptyTok);
+              }
+            } catch (e) {}
+            return resp;
+          }, function (err) { throw err; });
+        } catch (e) { return promise; }
+      };
       if (origFetch) {
         window.fetch = function (input, init) {
           try {
@@ -330,14 +523,18 @@
                 try { console.warn("[ngg-leak] direct now.gg fetch blocked from going direct:", sOut.slice(0, 140)); } catch (e) {}
                 sOut = forceProxy(sOut);
               }
-              return origFetch.call(this, sOut, fixBody(init));
+              var sInit = withPrefix(sOut, fixBody(init));
+              if (__nggIsAuthUrl(sOut)) return __nggWatchAuth(__nggFetchRetry(this, sOut, sInit, 1), __nggPutokEmpty(sOut, sInit, null));
+              return origFetch.call(this, sOut, sInit);
             }
             if ((typeof URL !== "undefined" && input instanceof URL) ||
                 (input && typeof input.href === "string" && typeof input.url !== "string")) {
               var href = (typeof input.toString === "function") ? input.toString() : input.href;
               var hOut = forceProxy(scrubUrl(rewriteUrl(href)));
               if (hOut !== href) ngglog("fetch URL-obj", href.slice(0, 90), "->", hOut.slice(0, 90));
-              return origFetch.call(this, hOut, fixBody(init));
+              var hInit = withPrefix(hOut, fixBody(init));
+              if (__nggIsAuthUrl(hOut)) return __nggWatchAuth(__nggFetchRetry(this, hOut, hInit, 1), __nggPutokEmpty(hOut, hInit, null));
+              return origFetch.call(this, hOut, hInit);
             }
             if (input && typeof input.url === "string") {
               var cur = input.url;
@@ -346,12 +543,20 @@
               if (init !== undefined || (input && fixed !== cur)) {
                 try {
                   var base = fixed !== cur ? new Request(fixed, input) : input;
-                  var useInit = init === undefined ? undefined : fixBody(init);
+                  var useInit = init === undefined ? withPrefix(fixed, {}) : withPrefix(fixed, fixBody(init));
                   input = (useInit === undefined && fixed !== cur) ? base : new Request(base, useInit);
                   init = undefined;
                   if (fixed !== cur) ngglog("fetch Request", cur.slice(0, 90), "->", fixed.slice(0, 90));
+                  try {
+                    var finalUrl = (input && input.url) || fixed || cur;
+                    if (__nggIsAuthUrl(finalUrl)) return __nggWatchAuth(__nggFetchRetry(this, input, init, 1), __nggPutokEmpty(finalUrl, null, input));
+                  } catch (e) {}
                   return origFetch.call(this, input, init);
                 } catch (e) { ngglog("Request rebuild failed", String(e).slice(0, 120)); }
+              } else {
+                try {
+                  if (__nggIsAuthUrl(cur)) return __nggWatchAuth(__nggFetchRetry(this, input, init, 1), __nggPutokEmpty(cur, init, input));
+                } catch (e) {}
               }
             }
           } catch (e) {}
@@ -396,7 +601,18 @@
       var origOpen = window.XMLHttpRequest && window.XMLHttpRequest.prototype.open;
       if (origOpen) {
         window.XMLHttpRequest.prototype.open = function (method, url) {
-          try { if (typeof url === "string") arguments[1] = forceProxy(scrubUrl(rewriteUrl(url))); } catch (e) {}
+          try {
+            if (typeof url === "string") arguments[1] = forceProxy(scrubUrl(rewriteUrl(url)));
+            try {
+              this.__nggPfx = "";
+              var ou = String(arguments[1] || "");
+              if (ou.indexOf("/oapi/") === 0 || ou.indexOf("/accounts/") === 0) {
+                var pp = "";
+                try { pp = sessionStorage.getItem("ngg_prefix") || ""; } catch (e) {}
+                if (/^\d{1,3}$/.test(pp)) this.__nggPfx = pp;
+              }
+            } catch (e) {}
+          } catch (e) {}
           return origOpen.apply(this, arguments);
         };
       }
@@ -404,6 +620,7 @@
         var origSend = window.XMLHttpRequest && window.XMLHttpRequest.prototype.send;
         if (origSend) {
           window.XMLHttpRequest.prototype.send = function (body) {
+            try { if (this.__nggPfx) this.setRequestHeader("x-ngg-prefix", this.__nggPfx); } catch (e) {}
             try { if (typeof body === "string") arguments[0] = fixOriginLeak(body); } catch (e) {}
             return origSend.apply(this, arguments);
           };
@@ -415,6 +632,10 @@
         if (u.indexOf("wss://cdn.now.gg/") === 0) return wsScheme() + "//" + REAL.host + "/__cdn/" + u.slice("wss://cdn.now.gg/".length);
         if (u.indexOf("ws://cdn.now.gg/") === 0) return wsScheme() + "//" + REAL.host + "/__cdn/" + u.slice("ws://cdn.now.gg/".length);
         if (/^wss?:\/\/(www\.)?now\.gg\//.test(u)) return wsScheme() + "//" + REAL.host + u.replace(/^wss?:\/\/(www\.)?now\.gg/, "");
+        try {
+          var mW = u.match(/^wss?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*\.now\.gg)(\/.*)?$/i);
+          if (mW) return wsScheme() + "//" + REAL.host + "/__nowgg/" + mW[1].toLowerCase() + (mW[2] || "/");
+        } catch (e) {}
         return u;
       };
       var OrigWS = window.WebSocket;
@@ -599,4 +820,99 @@
     hideMoreTime();
     setInterval(hideMoreTime, 4000);
   })();
+})();
+(function () {
+  
+  
+  
+  
+  
+  
+  if (window.__sealAuthWatch) return; window.__sealAuthWatch = 1;
+  var fails = 0;
+  var RESET_COOKIE = "__seal_reset";
+  function getReset() {
+    try {
+      var m = String(document.cookie || "").match(/(?:^|;\s*)__seal_reset=(\d+)\.(\d+)/);
+      if (m) return { n: parseInt(m[1], 10) || 0, t: parseInt(m[2], 10) || 0 };
+    } catch (e) {}
+    return { n: 0, t: 0 };
+  }
+  function setReset(n, t) {
+    try { document.cookie = RESET_COOKIE + "=" + n + "." + t + "; Path=/; Max-Age=600"; } catch (e) {}
+  }
+  function overlay(text, stuck) {
+    try {
+      if (document.querySelector("[data-seal-authreset]")) return;
+      var d = document.createElement("div");
+      d.setAttribute("data-seal-authreset", stuck ? "stuck" : "1");
+      d.textContent = text;
+      d.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);color:#fff;display:flex;justify-content:center;align-items:center;text-align:center;padding:24px;font:600 20px system-ui,sans-serif;z-index:2147483647;";
+      (document.body || document.documentElement).appendChild(d);
+    } catch (e) {}
+  }
+  function resetSession() {
+    try {
+      var now = Date.now();
+      var rc = getReset();
+      if (now - (rc.t || 0) > 600000) rc = { n: 0, t: now };
+      
+      
+      if (rc.n >= 1) {
+        overlay("session failed. please wait a sec and try again.", true);
+        return;
+      }
+      setReset(rc.n + 1, rc.t || now);
+      overlay("refreshing session…");
+      try { localStorage.clear(); } catch (e) {}
+      try { sessionStorage.clear(); } catch (e) {}
+      
+      
+      
+      
+      
+      
+      
+      
+      try {
+        String(document.cookie || "").split(";").forEach(function (c) {
+          var k = c.split("=")[0].replace(/^\s+|\s+$/g, "");
+          if (!k || k === RESET_COOKIE) return;
+          
+          
+          var drop = (k === "__ngg_sid") || (k.indexOf("__seal_") === 0);
+          if (drop) {
+            try { document.cookie = k + "=; Path=/; Max-Age=0"; } catch (e) {}
+          }
+        });
+      } catch (e) {}
+      
+      
+      
+      try {
+        if (typeof fetch === "function") {
+          fetch("/__session_reset", { cache: "no-store" }).then(function () {}, function () {});
+        }
+      } catch (e) {}
+      setTimeout(function () { try { window.location.reload(); } catch (e) {} }, 1200);
+    } catch (e) {}
+  }
+  window.__sealNoteAuthResult = function (ok, emptyToken) {
+    try {
+      
+      
+      
+      if (ok) { fails = 0; return; }
+      if (!emptyToken) return; 
+      fails++;
+      if (fails >= 2) { fails = 0; resetSession(); }
+    } catch (e) {}
+  };
+  try {
+    window.__sealAuthWatchApi = {
+      note: function (ok, empty) { window.__sealNoteAuthResult(ok, empty); },
+      getReset: getReset, setReset: setReset,
+      fails: function () { return fails; }
+    };
+  } catch (e) {}
 })();
